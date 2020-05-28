@@ -12,6 +12,7 @@ func main() {
 	n := flag.Int("n", 1, "the number of columns")
 	d := flag.String("d", "\t ", "separator of input")
 	sep := flag.String("s", "\t", "separator of output")
+	w := flag.Bool("warning", false, "ignore warnings")
 	flag.Parse()
 
 	s := bufio.NewScanner(os.Stdin)
@@ -29,7 +30,18 @@ func main() {
 
 	for i := 0; i < colnum; i += *n {
 		for j := 0; j < len(buf); j++ {
-			l := strings.Join(buf[j][i:i+*n], *sep)
+			start := i
+			end := i + *n
+			if end >= len(buf[j]) {
+				end = len(buf[j])
+			}
+			if start >= end {
+				if !*w {
+					fmt.Fprintf(os.Stderr, "WARNING: row %d, column %d\n", j, i)
+				}
+				continue
+			}
+			l := strings.Join(buf[j][start:end], *sep)
 			fmt.Println(l)
 		}
 	}
